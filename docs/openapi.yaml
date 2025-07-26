@@ -1,0 +1,49 @@
+openapi: 3.0.3
+info:
+  title: Mock DID:ION Service
+  version: 1.0.0
+paths:
+  /did/create:
+    post:
+      summary: Create new DID:ION
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                publicKey:
+                  type: string
+      responses:
+        '201':
+          description: DID created
+  /did/resolve/{did}:
+    get:
+      summary: Resolve DID document
+      parameters:
+        - name: did
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: DID document
+  /did/verify:
+    post:
+      summary: Verify signature
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                did:
+                  type: string
+                data:
+                  type: string
+                signature:
+                  type: string
+      responses:
+        '200':
+          description: Verification result
