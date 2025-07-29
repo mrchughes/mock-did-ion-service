@@ -249,8 +249,34 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+
 components:
   schemas:
+    Service:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Service identifier
+          example: did:ion:EiClkZMDxPKqC9c-umQfTkR8vvZ9JPhl_xLDI9Nfk38w5w#service-1
+        type:
+          type: string
+          description: Service type
+          example: LinkedDomains
+        serviceEndpoint:
+          oneOf:
+            - type: string
+              description: Service endpoint URI
+              example: https://example.com
+            - type: array
+              description: Multiple service endpoints
+              items:
+                type: string
+                example: https://example.com
+            - type: object
+              description: Complex service endpoint definition
+              additionalProperties: true
+
     DIDCreateResponse:
       type: object
       properties:
@@ -263,6 +289,124 @@ components:
         created:
           type: string
           format: date-time
+        transactionId:
+          type: string
+          description: The ID of the creation transaction
+          example: 5f8d7a9b2c3e4f1a0b9c8d7e6f5a4b3c
+
+    DIDUpdateResponse:
+      type: object
+      properties:
+        did:
+          type: string
+          description: The updated DID
+          example: did:ion:EiClkZMDxPKqC9c-umQfTkR8vvZ9JPhl_xLDI9Nfk38w5w
+        transactionId:
+          type: string
+          description: The ID of the update transaction
+          example: 5f8d7a9b2c3e4f1a0b9c8d7e6f5a4b3c
+        status:
+          type: string
+          enum: [pending, anchored]
+          description: Status of the update operation
+          example: pending
+        document:
+          $ref: '#/components/schemas/DIDDocument'
+
+    DIDRecoverResponse:
+      type: object
+      properties:
+        did:
+          type: string
+          description: The recovered DID
+          example: did:ion:EiClkZMDxPKqC9c-umQfTkR8vvZ9JPhl_xLDI9Nfk38w5w
+        transactionId:
+          type: string
+          description: The ID of the recovery transaction
+          example: 5f8d7a9b2c3e4f1a0b9c8d7e6f5a4b3c
+        status:
+          type: string
+          enum: [pending, anchored]
+          description: Status of the recovery operation
+          example: pending
+        document:
+          $ref: '#/components/schemas/DIDDocument'
+
+    DIDDeactivateResponse:
+      type: object
+      properties:
+        did:
+          type: string
+          description: The deactivated DID
+          example: did:ion:EiClkZMDxPKqC9c-umQfTkR8vvZ9JPhl_xLDI9Nfk38w5w
+        transactionId:
+          type: string
+          description: The ID of the deactivation transaction
+          example: 5f8d7a9b2c3e4f1a0b9c8d7e6f5a4b3c
+        status:
+          type: string
+          enum: [pending, anchored]
+          description: Status of the deactivation operation
+          example: pending
+
+    TransactionStatus:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The transaction ID
+          example: 5f8d7a9b2c3e4f1a0b9c8d7e6f5a4b3c
+        did:
+          type: string
+          description: The DID associated with the transaction
+          example: did:ion:EiClkZMDxPKqC9c-umQfTkR8vvZ9JPhl_xLDI9Nfk38w5w
+        type:
+          type: string
+          enum: [create, update, recover, deactivate]
+          description: The type of operation
+          example: update
+        status:
+          type: string
+          enum: [pending, anchored, failed]
+          description: The status of the transaction
+          example: pending
+        timestamp:
+          type: string
+          format: date-time
+          description: When the transaction was initiated
+        anchoredAt:
+          type: string
+          format: date-time
+          description: When the transaction was anchored (if applicable)
+        error:
+          type: string
+          description: Error message if the transaction failed
+
+    Operation:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The operation ID
+          example: 5f8d7a9b2c3e4f1a0b9c8d7e6f5a4b3c
+        type:
+          type: string
+          enum: [create, update, recover, deactivate]
+          description: The type of operation
+          example: create
+        timestamp:
+          type: string
+          format: date-time
+          description: When the operation was performed
+        status:
+          type: string
+          enum: [pending, anchored, failed]
+          description: The status of the operation
+          example: anchored
+        transactionId:
+          type: string
+          description: Associated transaction ID
+          example: 5f8d7a9b2c3e4f1a0b9c8d7e6f5a4b3c
 
     DIDResolveResponse:
       type: object
@@ -325,6 +469,10 @@ components:
           type: array
           items:
             type: string
+        service:
+          type: array
+          items:
+            $ref: '#/components/schemas/Service'
 
     VerificationMethod:
       type: object
