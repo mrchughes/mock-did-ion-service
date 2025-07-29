@@ -2,48 +2,382 @@ openapi: 3.0.3
 info:
   title: Mock DID:ION Service
   version: 1.0.0
+  description: A mock service for simulating DID:ION functionality in the Solid VC Microservices Prototype
+  contact:
+    name: PDS3.0 Build Team
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+  - url: https://api.mock-did-ion.example.com
+    description: Production server
+
 paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      description: Returns the health status of the service
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  timestamp:
+                    type: string
+                    format: date-time
+                  service:
+                    type: string
+                    example: Mock DID:ION Service
+                  version:
+                    type: string
+                    example: 1.0.0
+
   /did/create:
     post:
       summary: Create new DID:ION
+      description: Creates a new DID:ION identifier with the provided public key
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - publicKey
               properties:
                 publicKey:
                   type: string
+                  description: Base58-encoded public key
+                  example: 3M2mTGjHSXzpzVcxUjGCDNDHn5M9ux4rGqF8RpqBsHQA
+                keyType:
+                  type: string
+                  enum: [Ed25519, RSA, secp256k1]
+                  description: Type of cryptographic key
+                  default: Ed25519
       responses:
         '201':
-          description: DID created
+          description: DID created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/DIDCreateResponse'
+                  timestamp:
+                    type: string
+                    format: date-time
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /did/resolve/{did}:
     get:
       summary: Resolve DID document
+      description: Retrieves the DID document for the specified DID
       parameters:
         - name: did
           in: path
           required: true
           schema:
             type: string
+            pattern: '^did:ion:.+$'
+          example: did:ion:EiClkZMDxPKqC9c-umQfTkR8vvZ9JPhl_xLDI9Nfk38w5w
       responses:
         '200':
-          description: DID document
+          description: DID document resolved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/DIDResolveResponse'
+                  timestamp:
+                    type: string
+                    format: date-time
+        '404':
+          description: DID not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Invalid DID format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /did/verify:
     post:
       summary: Verify signature
+      description: Verifies a signature against a DID's public key
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - did
+                - data
+                - signature
               properties:
                 did:
                   type: string
+                  pattern: '^did:ion:.+$'
+                  description: The DID to verify against
+                  example: did:ion:EiClkZMDxPKqC9c-umQfTkR8vvZ9JPhl_xLDI9Nfk38w5w
                 data:
                   type: string
+                  description: The data that was signed
+                  example: Hello, World!
                 signature:
                   type: string
+                  description: The signature to verify
+                  example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+                keyId:
+                  type: string
+                  description: Optional specific key ID to use for verification
+                  example: did:ion:EiClkZMDxPKqC9c-umQfTkR8vvZ9JPhl_xLDI9Nfk38w5w#key-1
       responses:
         '200':
           description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/VerifyResponse'
+                  timestamp:
+                    type: string
+                    format: date-time
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /did/list:
+    get:
+      summary: List all DIDs (testing endpoint)
+      description: Returns a list of all DIDs in the registry for testing purposes
+      responses:
+        '200':
+          description: List of DIDs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      dids:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DIDState'
+                      count:
+                        type: number
+                        example: 5
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /did/{did}:
+    delete:
+      summary: Deactivate a DID (testing endpoint)
+      description: Deactivates a DID for testing purposes
+      parameters:
+        - name: did
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^did:ion:.+$'
+          example: did:ion:EiClkZMDxPKqC9c-umQfTkR8vvZ9JPhl_xLDI9Nfk38w5w
+      responses:
+        '200':
+          description: DID deactivated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: DID deactivated successfully
+                  timestamp:
+                    type: string
+                    format: date-time
+        '404':
+          description: DID not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    DIDCreateResponse:
+      type: object
+      properties:
+        did:
+          type: string
+          pattern: '^did:ion:.+$'
+          example: did:ion:EiClkZMDxPKqC9c-umQfTkR8vvZ9JPhl_xLDI9Nfk38w5w
+        document:
+          $ref: '#/components/schemas/DIDDocument'
+        created:
+          type: string
+          format: date-time
+
+    DIDResolveResponse:
+      type: object
+      properties:
+        didDocument:
+          $ref: '#/components/schemas/DIDDocument'
+        didDocumentMetadata:
+          type: object
+          properties:
+            created:
+              type: string
+              format: date-time
+            updated:
+              type: string
+              format: date-time
+            deactivated:
+              type: boolean
+        didResolutionMetadata:
+          type: object
+          properties:
+            contentType:
+              type: string
+              example: application/did+ld+json
+
+    DIDDocument:
+      type: object
+      properties:
+        '@context':
+          type: array
+          items:
+            type: string
+          example: 
+            - https://www.w3.org/ns/did/v1
+            - https://w3id.org/security/suites/ed25519-2020/v1
+        id:
+          type: string
+          pattern: '^did:ion:.+$'
+          example: did:ion:EiClkZMDxPKqC9c-umQfTkR8vvZ9JPhl_xLDI9Nfk38w5w
+        verificationMethod:
+          type: array
+          items:
+            $ref: '#/components/schemas/VerificationMethod'
+        authentication:
+          type: array
+          items:
+            type: string
+        assertionMethod:
+          type: array
+          items:
+            type: string
+        keyAgreement:
+          type: array
+          items:
+            type: string
+        capabilityInvocation:
+          type: array
+          items:
+            type: string
+        capabilityDelegation:
+          type: array
+          items:
+            type: string
+
+    VerificationMethod:
+      type: object
+      properties:
+        id:
+          type: string
+          example: did:ion:EiClkZMDxPKqC9c-umQfTkR8vvZ9JPhl_xLDI9Nfk38w5w#key-1
+        type:
+          type: string
+          enum: [Ed25519VerificationKey2020, RsaVerificationKey2018, EcdsaSecp256k1VerificationKey2019]
+        controller:
+          type: string
+          pattern: '^did:ion:.+$'
+        publicKeyBase58:
+          type: string
+          example: 3M2mTGjHSXzpzVcxUjGCDNDHn5M9ux4rGqF8RpqBsHQA
+
+    VerifyResponse:
+      type: object
+      properties:
+        verified:
+          type: boolean
+          example: true
+        error:
+          type: string
+          description: Error message if verification failed
+
+    DIDState:
+      type: object
+      properties:
+        did:
+          type: string
+          pattern: '^did:ion:.+$'
+        document:
+          $ref: '#/components/schemas/DIDDocument'
+        created:
+          type: string
+          format: date-time
+        updated:
+          type: string
+          format: date-time
+        deactivated:
+          type: boolean
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          description: Error message
+        timestamp:
+          type: string
+          format: date-time

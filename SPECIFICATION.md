@@ -1,5 +1,7 @@
 Solid VC Microservices Prototype Specification
 
+YOUU ARE DID-DION SERVICE BUILD TEAM.  BUILD THIS SERVICE ONLY, TO SPEC
+
 📄 Prototype Context Summary for Suppliers
 This specification defines a prototype Verifiable Credential (VC) system implemented as a set of containerized microservices. It is not for production, and the goal is to demonstrate working interoperability between Solid Personal Data Stores (PDS), OIDC-based authentication, and linked data-based credential issuance and consumption.
 

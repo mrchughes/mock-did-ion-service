@@ -1,0 +1,54 @@
+{
+    "name": "mock-did-ion-service",
+    "version": "1.0.0",
+    "description": "A mock service for simulating DID:ION functionality in the Solid VC Microservices Prototype",
+    "main": "dist/server.js",
+    "scripts": {
+        "build": "tsc",
+        "start": "node dist/server.js",
+        "dev": "nodemon src/server.ts",
+        "test": "jest",
+        "test:watch": "jest --watch",
+        "lint": "eslint src/**/*.ts",
+        "lint:fix": "eslint src/**/*.ts --fix"
+    },
+    "keywords": [
+        "did",
+        "ion",
+        "decentralized-identity",
+        "verifiable-credentials",
+        "solid"
+    ],
+    "author": "PDS3.0 Build Team",
+    "license": "MIT",
+    "dependencies": {
+        "express": "^4.18.2",
+        "cors": "^2.8.5",
+        "helmet": "^7.1.0",
+        "joi": "^17.11.0",
+        "winston": "^3.11.0",
+        "uuid": "^9.0.1",
+        "node-jose": "^2.2.0",
+        "multihashes": "^4.0.3"
+    },
+    "devDependencies": {
+        "@types/express": "^4.17.21",
+        "@types/cors": "^2.8.17",
+        "@types/uuid": "^9.0.7",
+        "@types/node": "^20.10.4",
+        "@types/jest": "^29.5.8",
+        "@types/supertest": "^2.0.16",
+        "typescript": "^5.3.2",
+        "nodemon": "^3.0.2",
+        "ts-node": "^10.9.1",
+        "jest": "^29.7.0",
+        "ts-jest": "^29.1.1",
+        "supertest": "^6.3.3",
+        "eslint": "^8.54.0",
+        "@typescript-eslint/eslint-plugin": "^6.12.0",
+        "@typescript-eslint/parser": "^6.12.0"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}
